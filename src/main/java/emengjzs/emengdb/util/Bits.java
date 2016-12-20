@@ -5,8 +5,6 @@
 package emengjzs.emengdb.util;
 
 
-
-
 /**
  * Utility methods for packing/unpacking primitive values in/out of byte arrays
  * using big-endian byte ordering.
@@ -101,6 +99,10 @@ public class Bits {
 
     public static void putDouble(byte[] b, int off, double val) {
         putLong(b, off, Double.doubleToLongBits(val));
+    }
+
+    public static void putBytes(byte[] b, int off, byte[] val) {
+        System.arraycopy(val, 0, b, off, val.length);
     }
 }
 
