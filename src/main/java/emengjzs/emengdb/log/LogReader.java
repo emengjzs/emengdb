@@ -14,7 +14,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import static emengjzs.emengdb.log.LogFileException.Type.RECORD_DATA_ERRPR;
+import static emengjzs.emengdb.log.LogFileException.Type.RECORD_DATA_ERROR;
 
 /**
  * Created by emengjzs on 2016/9/3.
@@ -66,7 +66,7 @@ public class LogReader extends LogFormat {
                         inReading = true;
                     }
                     else {
-                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERRPR);
+                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
                     }
                     break;
                 }
@@ -77,20 +77,20 @@ public class LogReader extends LogFormat {
                         return new Slice(byteBuilder.toByteArray());
                     }
                     else {
-                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERRPR);
+                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
                     }
                 }
 
                 case MIDDLE_TYPE: {
                     if (! inReading) {
-                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERRPR);
+                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
                     }
                     break;
                 }
 
                 case LAST_TYPE: {
                     if (! inReading) {
-                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERRPR);
+                        throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
                     }
                     return new Slice(byteBuilder.toByteArray());
                 }
@@ -119,7 +119,7 @@ public class LogReader extends LogFormat {
             RecordType type = RecordType.of(bf.get());
 
             if (bf.remaining() < length) {
-                throw new LogFileException(RECORD_DATA_ERRPR);
+                throw new LogFileException(RECORD_DATA_ERROR);
             }
 
              /*

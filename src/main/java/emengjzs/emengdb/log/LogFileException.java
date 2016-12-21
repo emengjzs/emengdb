@@ -44,10 +44,10 @@ public class LogFileException extends Exception {
         UNKNOWN_IO_ERROR,
         UNKNOWN_RECORD_TYPE_ERROR,
         CRC_NOT_MATCH_ERROR,
-        RECORD_DATA_ERRPR,
+        RECORD_DATA_ERROR,
     }
 
-
+    @SuppressWarnings("warning")
     public <E> E getObject() {
         return (E) object;
     }
