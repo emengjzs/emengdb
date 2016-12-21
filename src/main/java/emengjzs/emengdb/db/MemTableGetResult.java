@@ -9,29 +9,32 @@ package emengjzs.emengdb.db;
  */
 public class MemTableGetResult {
 
+    public static final int NOT_FOUND = 0;
+    public static final int SUCCESS   = 1;
+    public static final int DELETED   = 2;
+
     Slice value;
-    Status status;
+    int status;
+
+    MemTableGetResult() {
+        status = NOT_FOUND;
+        this.value = null;
+    }
 
 
-
-    MemTableGetResult(Status status) {
+    MemTableGetResult(int status) {
         this.status = status;
         this.value = null;
     }
 
-    MemTableGetResult(Slice value, Status status) {
+    MemTableGetResult(Slice value, int status) {
         this.value = new Slice(value.toBytes());
         this.status = status;
-
     }
 
-}
-
-enum Status {
-    SUCCESS,
-    DELETED,
-    NOT_FOUND;
     boolean isSuccess() {
-        return this == SUCCESS;
+        return status == SUCCESS;
     }
 }
+
+

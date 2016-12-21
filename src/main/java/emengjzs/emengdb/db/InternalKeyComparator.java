@@ -9,28 +9,39 @@ import java.util.Comparator;
 /**
  * Created by emengjzs on 2016/8/31.
  */
-public class InternalKeyComparator implements Comparator<InternalKey> {
-
+public class InternalKeyComparator implements Comparator<byte[]> {
+    private InternalKeyCoder internalKeyCoder;
     private Comparator<Slice> userComparator;
 
-    InternalKeyComparator(Comparator<Slice> userComparator) {
+    public InternalKeyComparator(Comparator<Slice> userComparator) {
         this.userComparator = userComparator;
     }
 
-    InternalKeyComparator() {
-        this.userComparator = Slice::compareTo;
+    public InternalKeyComparator() {
+        this(Slice::compareTo);
     }
 
-    @Override
+    public void setInternalKeyCoder(InternalKeyCoder internalKeyCoder) {
+        this.internalKeyCoder = internalKeyCoder;
+    }
+
     /**
      * user_key + -> seq - -> flag -
      */
-    public int compare(InternalKey internalKey1, InternalKey internalKey2) {
-        int res =  userComparator.compare(internalKey1.getUserKey(), internalKey2.getUserKey());
+    @Override
+    public int compare(byte[] internalKey1, byte[] internalKey2) {
+        Slice userKeySlice1 = internalKeyCoder.getUserKeySlice(internalKey1);
+        Slice userKeySlice2 = internalKeyCoder.getUserKeySlice(internalKey2);
+
+        /* user_key cmp(+) */
+        int res = userComparator.compare(userKeySlice1, userKeySlice2);
+
         if (res == 0) {
+
+            /* seq cmp(-) ,  flag cmp(-)*/
             return Long.compareUnsigned(
-                    internalKey2.getSeqFlag(),
-                    internalKey1.getSeqFlag());
+                    internalKeyCoder.decodeSeqAndType(internalKey2, userKeySlice1.getLength()),
+                    internalKeyCoder.decodeSeqAndType(internalKey1, userKeySlice1.getLength()));
         }
         return res;
     }
@@ -39,9 +50,6 @@ public class InternalKeyComparator implements Comparator<InternalKey> {
     public Comparator<Slice> getUserComparator() {
         return this.userComparator;
     }
-    /*
-    public int compare(InternalKey o1, InternalKey o2) {
-        return 0;
-    }
-    */
+
 }
+
