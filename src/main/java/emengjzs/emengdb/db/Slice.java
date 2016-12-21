@@ -154,6 +154,10 @@ public class Slice implements Iterable<Byte>, Comparable<Slice> {
         return this.length - o.length;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Slice && compareTo((Slice) o) == 0;
+    }
 
     private class Itr implements Iterator<Byte> {
         int i = start;
