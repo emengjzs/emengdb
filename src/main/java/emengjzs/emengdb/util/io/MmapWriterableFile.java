@@ -105,6 +105,7 @@ public class MmapWriterableFile extends WritableFile {
     }
 
     @Override
+    @Deprecated
     public void write(int b) throws IOException {
         write((byte) b);
     }

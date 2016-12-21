@@ -24,6 +24,7 @@ public class PrimitiveWritable extends WritableFile implements DataOutput {
     }
 
     @Override
+    @Deprecated
     public void write(int b) throws IOException {
         writableFile.write((byte) b);
     }
@@ -41,6 +42,7 @@ public class PrimitiveWritable extends WritableFile implements DataOutput {
     }
 
     @Override
+    @Deprecated
     public void writeByte(int val) throws IOException {
         writableFile.write(val);
     }
