@@ -14,6 +14,7 @@ import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Created by emengjzs on 2016/8/30.
@@ -29,6 +30,8 @@ public class MemTable {
     private Comparator<Slice> userKeyComparator;
 
     private InternalKeyCoder internalKeyCoder;
+
+    private LongAdder seqNum;
 
     /*
      *  a general key comparator where the key to be compared
@@ -48,6 +51,7 @@ public class MemTable {
 
         table = new ConcurrentSkipListMap<>(cmp);
 
+        seqNum = new LongAdder();
     }
 
 
@@ -66,10 +70,11 @@ public class MemTable {
         if (floorEntry != null) {
 
             byte[] floorKey = floorEntry.getKey();
+            Slice userKeySlice = internalKeyCoder.getUserKeySlice(floorKey);
             if (userKeyComparator.compare(
-                    internalKeyCoder.getUserKeySlice(floorKey),
+                    userKeySlice,
                     lookupKey.getUserKey()) == 0) {
-                byte valueType = internalKeyCoder.decodeTypeByte(floorKey, floorKey.length);
+                byte valueType = internalKeyCoder.decodeTypeByte(floorKey, userKeySlice.length());
                 if (valueType == ValueType.VALUE.toByte()) {
                     memTableGetResult.value = new Slice(floorEntry.getValue());
                     memTableGetResult.status = MemTableGetResult.SUCCESS;
@@ -78,7 +83,7 @@ public class MemTable {
                     memTableGetResult.status = MemTableGetResult.DELETED;
                 }
                 else {
-                    LOG.warn("Unkonon ValueType: " + valueType + "key=[{}] value=[{}]",
+                    LOG.warn("Unknown ValueType: " + valueType + "key=[{}] value=[{}]",
                             floorKey, floorEntry.getValue());
                     memTableGetResult.status = MemTableGetResult.NOT_FOUND;
                 }
@@ -175,5 +180,13 @@ public class MemTable {
         }
     }
 
+
+    long getSeqNum() {
+        return seqNum.longValue();
+    }
+
+    void addSeqNum(long x) {
+        seqNum.add(x);
+    }
 
 }
