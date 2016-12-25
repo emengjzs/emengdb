@@ -40,8 +40,8 @@ public class InternalKeyComparator implements Comparator<byte[]> {
 
             /* seq cmp(-) ,  flag cmp(-)*/
             return Long.compareUnsigned(
-                    internalKeyCoder.decodeSeqAndType(internalKey2, userKeySlice1.getLength()),
-                    internalKeyCoder.decodeSeqAndType(internalKey1, userKeySlice1.getLength()));
+                    internalKeyCoder.decodeSeqAndType(internalKey1, userKeySlice1.length()),
+                    internalKeyCoder.decodeSeqAndType(internalKey2, userKeySlice2.length()));
         }
         return res;
     }
