@@ -45,7 +45,7 @@ public class MmapWriterableFile extends WritableFile {
 
     @Override
     public void write(Slice data) throws IOException {
-        write(data.array(), data.getStart(), data.getLength());
+        write(data.array(), data.getStart(), data.length());
     }
 
     private void unmapCurrentMap() {

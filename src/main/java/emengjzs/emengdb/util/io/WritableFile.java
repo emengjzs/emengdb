@@ -30,7 +30,7 @@ public abstract class WritableFile extends OutputStream {
 
 
     void write(Slice data) throws IOException {
-        write(data.array(), data.getStart(), data.getLength());
+        write(data.array(), data.getStart(), data.length());
     }
 
 
