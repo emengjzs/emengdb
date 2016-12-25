@@ -16,9 +16,16 @@ public class LookupKey implements InternalKey {
     long seqAndFlag;
 
 
-    LookupKey(byte[] key, long seq) {
+
+    LookupKey(Slice key, long seq) {
+        this.key = key.toBytes();
+        this.seqAndFlag = seq << 8 | ValueType.DELETE.toByte();
+    }
+
+
+    LookupKey(byte[] key, long seq, ValueType type) {
         this.key = Arrays.copyOf(key, key.length);
-        this.seqAndFlag = seq << 8 | ValueType.VALUE.toByte();
+        this.seqAndFlag = seq << 8 | type.v;
     }
 
     @Override
