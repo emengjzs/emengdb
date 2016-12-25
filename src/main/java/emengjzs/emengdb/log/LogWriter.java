@@ -31,7 +31,7 @@ public class LogWriter extends LogFormat {
 
     // TODO: consider the zero-length empty data
     public void addData(Slice data) throws IOException {
-        int leftSize = data.getLength();
+        int leftSize = data.length();
         int blockLeftSize = 0;
 
         // the start index of the data to be read.
