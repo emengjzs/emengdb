@@ -79,7 +79,7 @@ public class Slice implements Iterable<Byte>, Comparable<Slice> {
         return this.length == 0;
     }
 
-    public int getLength() {
+    public int length() {
         return this.length;
     }
 

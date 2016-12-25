@@ -10,7 +10,11 @@
 
     <groupId>emengjzs.emengdb</groupId>
     <artifactId>emengdb</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>server</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

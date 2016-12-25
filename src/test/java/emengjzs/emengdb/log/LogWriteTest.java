@@ -7,7 +7,6 @@ package emengjzs.emengdb.log;
 import emengjzs.emengdb.db.Slice;
 import emengjzs.emengdb.util.io.MmapWriterableFile;
 import emengjzs.emengdb.util.io.WritableFile;
-import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +17,8 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by emengjzs on 2016/10/7.
@@ -74,7 +75,7 @@ public class LogWriteTest {
         RandomAccessFile r = new RandomAccessFile(fileName, "r");
         reader = new LogReader(r, 0);
         for (String str : DataSet) {
-            Assertions.assertThat(str)
+            assertThat(str)
                     .isEqualTo(reader.readNextData().toString());
         }
 
@@ -84,7 +85,7 @@ public class LogWriteTest {
     @After
     public void clearFile() {
         (new File(fileName)).delete();
-        Assertions.assertThat((new File(fileName)).exists()).isFalse();
+        assertThat((new File(fileName)).exists()).isFalse();
     }
 
 }

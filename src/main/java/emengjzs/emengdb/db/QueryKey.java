@@ -25,7 +25,7 @@ public class QueryKey {
     }
 
     public int getKeySize() {
-        return userKey.getLength();
+        return userKey.length();
     }
 
     public long getSeq() {
