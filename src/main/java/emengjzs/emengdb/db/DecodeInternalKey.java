@@ -15,7 +15,7 @@ public class DecodeInternalKey implements InternalKey {
 
     public DecodeInternalKey(byte[] encodeInternalKey, InternalKeyCoder internalKeyCoder) {
         userKeySlice = internalKeyCoder.getUserKeySlice(encodeInternalKey);
-        seqAndType = internalKeyCoder.decodeSeqAndType(encodeInternalKey, userKeySlice.getLength());
+        seqAndType = internalKeyCoder.decodeSeqAndType(encodeInternalKey, userKeySlice.length());
     }
 
     @Override
@@ -26,7 +26,7 @@ public class DecodeInternalKey implements InternalKey {
 
     @Override
     public int getKeyLength() {
-        return userKeySlice.getLength();
+        return userKeySlice.length();
     }
 
 
