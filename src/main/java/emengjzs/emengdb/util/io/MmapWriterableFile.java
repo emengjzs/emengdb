@@ -18,13 +18,19 @@ import java.nio.channels.FileChannel;
  * Created by emengjzs on 2016/10/11.
  */
 public class MmapWriterableFile extends WritableFile {
+
+    public static final int MAX_MMAP_SIZE = Integer.MAX_VALUE;
+
     private RandomAccessFile rw;
     private FileChannel fileChannel;
     private MappedByteBuffer mmapBuffer;
-    private int mapSize = 1 << (16 - 1);
+    private int mapSize = 1 << (10 - 1);
     private long fileOffset;
     private boolean isLastMapSync = true;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+    private UmmapWorker unMapWorker;
+
 
     public MmapWriterableFile(String fileName, long offset) throws IOException {
 
@@ -32,6 +38,8 @@ public class MmapWriterableFile extends WritableFile {
         rw = new RandomAccessFile(fileName, "rw");
         fileChannel = rw.getChannel();
         mmapBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileOffset, 0);
+
+        unMapWorker = new UmmapWorker();
     }
 
     @Override
@@ -53,25 +61,15 @@ public class MmapWriterableFile extends WritableFile {
         // asume gc will collect this.
         fileOffset += mmapBuffer.capacity();
         isLastMapSync = true;
-        unmapMmaped0(mmapBuffer);
+        currentHandler.unMap(mmapBuffer);
         mmapBuffer = null;
     }
 
-    private void unmapMmaped0(ByteBuffer buffer) {
 
-        if (buffer instanceof sun.nio.ch.DirectBuffer) {
-            log.debug("Clean up ! {}",  buffer.capacity());
-            sun.misc.Cleaner cleaner = ((sun.nio.ch.DirectBuffer) buffer).cleaner();
-            if (cleaner != null) cleaner.clean();
-            log.debug("Clean up down !");
-        }
-
-    }
 
 
     private void resizeMap() throws IOException {
-        int MAX_MAP_SIZE = 1 << 24;
-        if (mapSize < MAX_MAP_SIZE) {
+        if (mapSize < MAX_MMAP_SIZE) {
             mapSize <<= 1;
         }
         // resize the file
@@ -119,14 +117,32 @@ public class MmapWriterableFile extends WritableFile {
     public void close() throws IOException {
         // sync();
         int unused = mmapBuffer.remaining();
+        changeHandler(true);
         unmapCurrentMap();
         rw.setLength(fileOffset - unused);
         fileChannel.close();
         rw.close();
+        unMapWorker.close();
     }
 
     @Override
     public void flush() throws IOException {
 
     }
+
+
+    interface UnmapHandler {
+        void unMap(ByteBuffer buffer);
+    }
+
+    UnmapHandler asyncHandler = (buffer -> unMapWorker.unMapAsync(buffer));
+    UnmapHandler syncHandler = (buffer -> unMapWorker.unMapSync(buffer));
+    UnmapHandler currentHandler = asyncHandler;
+
+
+    void changeHandler(boolean sync) {
+        currentHandler = sync ? syncHandler : asyncHandler;
+    }
+
+
 }
