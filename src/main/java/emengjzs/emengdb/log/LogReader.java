@@ -34,7 +34,7 @@ public class LogReader extends LogFormat {
     LogReader(RandomAccessFile file, long initialOffset) {
         this.randomAccessFile = file;
         this.initialOffset = initialOffset;
-        bf = ByteBuffer.allocate(K_BLOCK_SIZE);
+        bf = ByteBuffer.allocateDirect(K_BLOCK_SIZE);
         seekToInitBlock();
     }
 
@@ -162,10 +162,12 @@ public class LogReader extends LogFormat {
 
         bf.clear();
         // writeUTF8 to buffer
+
         int read = channel.read(bf);
         // set up to read from buffer
         bf.flip();
         return read > 0;
     }
+
 
 }
