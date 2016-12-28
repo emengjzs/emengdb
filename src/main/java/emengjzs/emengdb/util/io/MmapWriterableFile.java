@@ -115,14 +115,18 @@ public class MmapWriterableFile extends WritableFile {
 
     @Override
     public void close() throws IOException {
-        // sync();
         int unused = mmapBuffer.remaining();
-        changeHandler(true);
         unmapCurrentMap();
-        rw.setLength(fileOffset - unused);
-        fileChannel.close();
-        rw.close();
         unMapWorker.close();
+        try {
+            unMapWorker.waitForFinish();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            rw.setLength(fileOffset - unused);
+            fileChannel.close();
+            rw.close();
+        }
     }
 
     @Override
@@ -136,13 +140,13 @@ public class MmapWriterableFile extends WritableFile {
     }
 
     UnmapHandler asyncHandler = (buffer -> unMapWorker.unMapAsync(buffer));
-    UnmapHandler syncHandler = (buffer -> unMapWorker.unMapSync(buffer));
+    // UnmapHandler syncHandler = (buffer -> unMapWorker.unMapSync(buffer));
     UnmapHandler currentHandler = asyncHandler;
 
 
-    void changeHandler(boolean sync) {
-        currentHandler = sync ? syncHandler : asyncHandler;
-    }
+    //void changeHandler(boolean sync) {
+    //    currentHandler = sync ? syncHandler : asyncHandler;
+    //}
 
 
 }
