@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.log;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class LogReader extends LogFormat {
     LogReader(RandomAccessFile file, long initialOffset) {
         this.randomAccessFile = file;
         this.initialOffset = initialOffset;
-        bf = ByteBuffer.allocate(K_BLOCK_SIZE);
+        bf = ByteBuffer.allocateDirect(K_BLOCK_SIZE);
         seekToInitBlock();
     }
 
@@ -74,7 +74,7 @@ public class LogReader extends LogFormat {
                 case FULL_TYPE: {
                     if (! inReading) {
                         inReading = true;
-                        return new Slice(byteBuilder.toByteArray());
+                        return Slice.from(byteBuilder.toByteArray());
                     }
                     else {
                         throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
@@ -92,7 +92,7 @@ public class LogReader extends LogFormat {
                     if (! inReading) {
                         throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
                     }
-                    return new Slice(byteBuilder.toByteArray());
+                    return Slice.from(byteBuilder.toByteArray());
                 }
 
                 default: {
@@ -162,10 +162,12 @@ public class LogReader extends LogFormat {
 
         bf.clear();
         // writeUTF8 to buffer
+
         int read = channel.read(bf);
         // set up to read from buffer
         bf.flip();
         return read > 0;
     }
+
 
 }

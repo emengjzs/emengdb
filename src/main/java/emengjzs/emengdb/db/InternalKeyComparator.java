@@ -4,6 +4,8 @@
 
 package emengjzs.emengdb.db;
 
+import emengjzs.emengdb.util.byt.Slice;
+
 import java.util.Comparator;
 
 /**

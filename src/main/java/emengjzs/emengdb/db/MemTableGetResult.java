@@ -4,6 +4,8 @@
 
 package emengjzs.emengdb.db;
 
+import emengjzs.emengdb.util.byt.Slice;
+
 /**
  * Created by emengjzs on 2016/8/31.
  */
@@ -28,7 +30,7 @@ public class MemTableGetResult {
     }
 
     MemTableGetResult(Slice value, int status) {
-        this.value = new Slice(value.toBytes());
+        this.value = Slice.from(value.toBytes());
         this.status = status;
     }
 

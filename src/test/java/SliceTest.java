@@ -2,7 +2,7 @@
  * Copyright (c) 2016. emengjzs. All rights reserved.
  */
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -19,16 +19,16 @@ public class SliceTest {
 
     @Test
     public void testSlice1() {
-        Slice s = new Slice("dddd");
+        Slice s = Slice.from("dddd");
         Assertions.assertThat(s.toString()).isEqualTo("dddd");
         log.debug(s.toByteString());
         log.debug(s.toString());
 
-        s = new Slice("好大");
+        s = Slice.from("好大");
         Assertions.assertThat(s.toString()).isEqualTo("好大");
         log.debug(s.toByteString());
         log.debug(s.toString());
-        Assertions.assertThat(new Slice(new byte[]{(byte) 0xFF}).compareTo(new Slice(new byte[] {(byte) 0x00})))
+        Assertions.assertThat(Slice.from(new byte[]{(byte) 0xFF}).compareTo(Slice.from(new byte[] {(byte) 0x00})))
                 .isGreaterThan(0);
     }
 
@@ -39,7 +39,7 @@ public class SliceTest {
         ByteBuffer bf = ByteBuffer.allocate(8);
         bf.putLong(Long.MAX_VALUE);
         Assertions.assertThat(bf.position()).isEqualTo(8);
-        log.debug(new Slice(bf.array()).toByteString());
+        log.debug(Slice.from(bf.array()).toByteString());
     }
 
 

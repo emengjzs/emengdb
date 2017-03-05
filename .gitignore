@@ -18,6 +18,7 @@ hs_err_pid*
 
 # User-specific stuff:
 .idea
+.settings
 *.iml
 
 .idea/workspace.xml
@@ -62,3 +63,5 @@ crashlytics-build.properties
 fabric.properties
 
 target/
+
+server/

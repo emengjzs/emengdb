@@ -4,6 +4,7 @@
 
 package emengjzs.emengdb.db;
 
+import emengjzs.emengdb.util.byt.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,8 @@ public class MemTable {
 
     private LongAdder seqNum;
 
+    private ThresholdMarker memorySizeThreshold;
+
     /*
      *  a general key comparator where the key to be compared
      *  is the actual key inserted in skipList for implementation,
@@ -46,12 +49,11 @@ public class MemTable {
 
         internalKeyCoder = new InternalKeyCoder();
         cmp.setInternalKeyCoder(internalKeyCoder);
-
         userKeyComparator = cmp.getUserComparator();
 
         table = new ConcurrentSkipListMap<>(cmp);
-
         seqNum = new LongAdder();
+        memorySizeThreshold = new AtomicIntegerThresholdMarker(1 << 27);
     }
 
 
@@ -76,7 +78,7 @@ public class MemTable {
                     lookupKey.getUserKey()) == 0) {
                 byte valueType = internalKeyCoder.decodeTypeByte(floorKey, userKeySlice.length());
                 if (valueType == ValueType.VALUE.toByte()) {
-                    memTableGetResult.value = new Slice(floorEntry.getValue());
+                    memTableGetResult.value = Slice.from(floorEntry.getValue());
                     memTableGetResult.status = MemTableGetResult.SUCCESS;
                 }
                 else if (valueType == ValueType.DELETE.toByte()){
@@ -99,6 +101,10 @@ public class MemTable {
 
     public ListIterator<Entry<InternalKey, Slice>> getIterator() {
         return new MemTableIterator();
+    }
+
+    public void setMemorySizeThreshold(ThresholdMarker memorySizeThreshold) {
+        this.memorySizeThreshold = memorySizeThreshold;
     }
 
 
@@ -174,7 +180,7 @@ public class MemTable {
 
             @Override
             public Slice getValue() {
-                return new Slice(rawValue);
+                return Slice.from(rawValue);
             }
 
         }

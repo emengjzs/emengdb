@@ -4,7 +4,8 @@
 
 package emengjzs.emengdb.log;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
+import emengjzs.emengdb.test.core.MyTest;
 import emengjzs.emengdb.util.io.MmapWriterableFile;
 import emengjzs.emengdb.util.io.WritableFile;
 import org.junit.After;
@@ -23,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by emengjzs on 2016/10/7.
  */
-public class LogWriteTest {
+public class LogWriteTest extends MyTest {
 
     LogReader reader;
     LogWriter writer;
@@ -55,7 +56,6 @@ public class LogWriteTest {
     }
 
     @Test
-
     public void write() throws IOException, LogFileException {
         for (int i = 0; i < turns; i ++) {
             String str = getRandomString(random.nextInt(lengthRange) + 1);
@@ -63,12 +63,20 @@ public class LogWriteTest {
             DataSet.add(str);
         }
         System.out.print("data !");
+
+
+        long start = System.currentTimeMillis();
+
         for(String str : DataSet) {
-            writer.addData(new Slice(str));
+            writer.addData(Slice.from(str));
         }
 
         System.out.print("writeUTF8 !");
         diskWritableFile.flush();
+
+        log.debug("End - {} ms", (System.currentTimeMillis() - start) );
+
+
         // diskWritableFile.sync();
         diskWritableFile.close();
         System.out.print("writeUTF8 !");
@@ -84,7 +92,8 @@ public class LogWriteTest {
 
     @After
     public void clearFile() {
-        (new File(fileName)).delete();
+        boolean delete = (new File(fileName)).delete();
+        assertThat(delete).isTrue();
         assertThat((new File(fileName)).exists()).isFalse();
     }
 

@@ -4,6 +4,8 @@
 
 package emengjzs.emengdb.db;
 
+import emengjzs.emengdb.util.byt.Slice;
+
 import java.util.Arrays;
 
 /**
@@ -30,7 +32,7 @@ public class LookupKey implements InternalKey {
 
     @Override
     public Slice getUserKey() {
-        return new Slice(key);
+        return Slice.from(key);
     }
 
     @Override

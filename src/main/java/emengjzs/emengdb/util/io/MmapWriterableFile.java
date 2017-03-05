@@ -4,7 +4,8 @@
 
 package emengjzs.emengdb.util.io;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
+import emengjzs.emengdb.util.byt.SliceByteStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,21 +19,51 @@ import java.nio.channels.FileChannel;
  * Created by emengjzs on 2016/10/11.
  */
 public class MmapWriterableFile extends WritableFile {
+
+    public static final int MAX_MMAP_SIZE = Integer.MAX_VALUE;
+
     private RandomAccessFile rw;
     private FileChannel fileChannel;
     private MappedByteBuffer mmapBuffer;
-    private int mapSize = 1 << (16 - 1);
+    private int mapSize = 1 << (10 - 1);
     private long fileOffset;
     private boolean isLastMapSync = true;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public MmapWriterableFile(String fileName, long offset) throws IOException {
+    private UmmapWorker unMapWorker;
 
+    private SliceByteStreamHandler sliceWriteHandler;
+
+    public enum Flag {
+        APPEND,
+        TRUNCATE,
+
+    }
+
+
+    public MmapWriterableFile(String fileName, Flag flag) throws IOException {
+        if (flag == Flag.APPEND)
+            init(fileName, -1);
+        else {
+            init(fileName, 0);
+        }
+    }
+
+    public MmapWriterableFile(String fileName, long offset) throws IOException {
+        init(fileName, offset);
+    }
+
+    private void init(String fileName, long offset) throws IOException {
         this.fileOffset = offset;
         rw = new RandomAccessFile(fileName, "rw");
         fileChannel = rw.getChannel();
+        offset = offset == -1 ? rw.length() : offset;
         mmapBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileOffset, 0);
+        unMapWorker = new UmmapWorker();
+        sliceWriteHandler = ByteStream.newSliceWriteHandler(this);
     }
+
+
 
     @Override
     public void sync() throws IOException {
@@ -43,35 +74,21 @@ public class MmapWriterableFile extends WritableFile {
         mmapBuffer.force();
     }
 
-    @Override
-    public void write(Slice data) throws IOException {
-        write(data.array(), data.getStart(), data.length());
-    }
 
     private void unmapCurrentMap() {
         // mmapBuffer.force();
         // asume gc will collect this.
         fileOffset += mmapBuffer.capacity();
         isLastMapSync = true;
-        unmapMmaped0(mmapBuffer);
+        currentHandler.unMap(mmapBuffer);
         mmapBuffer = null;
     }
 
-    private void unmapMmaped0(ByteBuffer buffer) {
 
-        if (buffer instanceof sun.nio.ch.DirectBuffer) {
-            log.debug("Clean up ! {}",  buffer.capacity());
-            sun.misc.Cleaner cleaner = ((sun.nio.ch.DirectBuffer) buffer).cleaner();
-            if (cleaner != null) cleaner.clean();
-            log.debug("Clean up down !");
-        }
-
-    }
 
 
     private void resizeMap() throws IOException {
-        int MAX_MAP_SIZE = 1 << 24;
-        if (mapSize < MAX_MAP_SIZE) {
+        if (mapSize < MAX_MMAP_SIZE) {
             mapSize <<= 1;
         }
         // resize the file
@@ -115,18 +132,42 @@ public class MmapWriterableFile extends WritableFile {
         this.write(b, 0, b.length);
     }
 
+
+    @Override
+    public void write(Slice data) throws IOException {
+        data.serialize(sliceWriteHandler);
+    }
+
     @Override
     public void close() throws IOException {
         // sync();
         int unused = mmapBuffer.remaining();
+        changeHandler(true);
         unmapCurrentMap();
         rw.setLength(fileOffset - unused);
         fileChannel.close();
         rw.close();
+        unMapWorker.close();
     }
 
     @Override
     public void flush() throws IOException {
 
     }
+
+
+    interface UnmapHandler {
+        void unMap(ByteBuffer buffer);
+    }
+
+    private UnmapHandler asyncHandler = (buffer -> unMapWorker.unMapAsync(buffer));
+    private UnmapHandler syncHandler = (buffer -> unMapWorker.unMapSync(buffer));
+    private UnmapHandler currentHandler = asyncHandler;
+
+
+    private void changeHandler(boolean sync) {
+        currentHandler = sync ? syncHandler : asyncHandler;
+    }
+
+
 }

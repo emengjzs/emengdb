@@ -7,9 +7,11 @@ package emengjzs.emengdb;
 import emengjzs.emengdb.api.EmengDB;
 import emengjzs.emengdb.api.PrimitiveEmengAdapter;
 import emengjzs.emengdb.db.EmengdbImpt;
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 import emengjzs.emengdb.test.core.MyTest;
 import org.junit.Test;
+
+import java.io.IOException;
 
 /**
  * Created by emengjzs on 2016/12/25.
@@ -18,6 +20,9 @@ public class MemtableTest extends MyTest {
 
     EmengDB db = new EmengdbImpt();
     PrimitiveEmengAdapter adapter = new PrimitiveEmengAdapter(db);
+
+    public MemtableTest() throws IOException {
+    }
 
     @Test
     public void testStringMemtable() {
@@ -43,8 +48,8 @@ public class MemtableTest extends MyTest {
 
 
 
-        Slice keySlice = new Slice(new byte[] { 0x01, 0x02});
-        Slice value = new Slice(new byte[] { 0x03, 0x04});
+        Slice keySlice = Slice.from(new byte[] { 0x01, 0x02});
+        Slice value = Slice.from(new byte[] { 0x03, 0x04});
 
 
         for (int i = 0; i < 10000; i ++ ) {
