@@ -4,7 +4,8 @@
 
 package emengjzs.emengdb.util.io;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
+import emengjzs.emengdb.util.byt.SliceByteStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +32,38 @@ public class MmapWriterableFile extends WritableFile {
 
     private UmmapWorker unMapWorker;
 
+    private SliceByteStreamHandler sliceWriteHandler;
+
+    public enum Flag {
+        APPEND,
+        TRUNCATE,
+
+    }
+
+
+    public MmapWriterableFile(String fileName, Flag flag) throws IOException {
+        if (flag == Flag.APPEND)
+            init(fileName, -1);
+        else {
+            init(fileName, 0);
+        }
+    }
 
     public MmapWriterableFile(String fileName, long offset) throws IOException {
+        init(fileName, offset);
+    }
 
+    private void init(String fileName, long offset) throws IOException {
         this.fileOffset = offset;
         rw = new RandomAccessFile(fileName, "rw");
         fileChannel = rw.getChannel();
+        offset = offset == -1 ? rw.length() : offset;
         mmapBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, fileOffset, 0);
-
         unMapWorker = new UmmapWorker();
+        sliceWriteHandler = ByteStream.newSliceWriteHandler(this);
     }
+
+
 
     @Override
     public void sync() throws IOException {
@@ -51,10 +74,6 @@ public class MmapWriterableFile extends WritableFile {
         mmapBuffer.force();
     }
 
-    @Override
-    public void write(Slice data) throws IOException {
-        write(data.array(), data.getStart(), data.length());
-    }
 
     private void unmapCurrentMap() {
         // mmapBuffer.force();
@@ -113,6 +132,12 @@ public class MmapWriterableFile extends WritableFile {
         this.write(b, 0, b.length);
     }
 
+
+    @Override
+    public void write(Slice data) throws IOException {
+        data.serialize(sliceWriteHandler);
+    }
+
     @Override
     public void close() throws IOException {
         // sync();
@@ -135,12 +160,12 @@ public class MmapWriterableFile extends WritableFile {
         void unMap(ByteBuffer buffer);
     }
 
-    UnmapHandler asyncHandler = (buffer -> unMapWorker.unMapAsync(buffer));
-    UnmapHandler syncHandler = (buffer -> unMapWorker.unMapSync(buffer));
-    UnmapHandler currentHandler = asyncHandler;
+    private UnmapHandler asyncHandler = (buffer -> unMapWorker.unMapAsync(buffer));
+    private UnmapHandler syncHandler = (buffer -> unMapWorker.unMapSync(buffer));
+    private UnmapHandler currentHandler = asyncHandler;
 
 
-    void changeHandler(boolean sync) {
+    private void changeHandler(boolean sync) {
         currentHandler = sync ? syncHandler : asyncHandler;
     }
 

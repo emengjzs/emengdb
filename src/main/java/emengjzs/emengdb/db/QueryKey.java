@@ -4,6 +4,8 @@
 
 package emengjzs.emengdb.db;
 
+import emengjzs.emengdb.util.byt.Slice;
+
 /**
  * Created by emengjzs on 2016/8/31.
  */
@@ -17,7 +19,7 @@ public class QueryKey {
     public QueryKey(long seq, Slice userKey) {
         this.seq = seq;
         type = ValueType.VALUE;
-        this.userKey = new Slice(userKey, true);
+        this.userKey = Slice.from(userKey.toBytes());
     }
 
     public Slice getUserKey() {

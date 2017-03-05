@@ -9,6 +9,7 @@ package emengjzs.emengdb.db;
  */
 
 import emengjzs.emengdb.util.Bits;
+import emengjzs.emengdb.util.byt.Slice;
 
 import java.util.Arrays;
 
@@ -62,7 +63,7 @@ public class InternalKeyCoder {
     }
 
     public Slice getUserKeySlice(byte[] internalKey) {
-        return new Slice(internalKey, NO_ZIP_USER_KEY_OFFSET, Bits.getInt(internalKey, 0));
+        return Slice.from(internalKey, NO_ZIP_USER_KEY_OFFSET, Bits.getInt(internalKey, 0));
     }
 
     public long decodeSeqAndType(byte[] internalKey) {

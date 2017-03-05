@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.util.io;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,8 +29,15 @@ public abstract class WritableFile extends OutputStream {
     }
 
 
-    void write(Slice data) throws IOException {
-        write(data.array(), data.getStart(), data.length());
+    public void write(Slice data) throws IOException {
+        data.serialize((bytes, offset, length) -> {
+            try {
+                write(bytes, offset, length);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 

@@ -6,7 +6,7 @@ package emengjzs.emengdb.api;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 
 import java.util.function.Function;
 
@@ -27,25 +27,25 @@ public class PrimitiveEmengAdapter implements EmengDB {
 
 
     public Slice get(String key) {
-        return db.get(new Slice(key));
+        return db.get(Slice.from(key));
     }
 
 
     public Slice get(int key) {
-        return db.get(new Slice(Ints.toByteArray(key)));
+        return db.get(Slice.from(Ints.toByteArray(key)));
     }
 
     public Slice get(long key) {
-        return db.get(new Slice(Longs.toByteArray(key)));
+        return db.get(Slice.from(Longs.toByteArray(key)));
     }
 
     public String getString(String key) {
-        return db.get(new Slice(key)).toString();
+        return db.get(Slice.from(key)).toString();
     }
 
 
     public String getString(int key) {
-        return get(key, intKey -> new Slice(Ints.toByteArray(intKey)), Slice::toString);
+        return get(key, intKey ->Slice.from(Ints.toByteArray(intKey)), Slice::toString);
     }
 
     public <S, T> T get(S key, Function<S, ? extends Slice> keyConvert, Function<Slice, T> targetConvert) {
@@ -57,12 +57,12 @@ public class PrimitiveEmengAdapter implements EmengDB {
 
 
     public void put(String key, String value) {
-        db.put(new Slice(key), new Slice(value));
+        db.put(Slice.from(key), Slice.from(value));
     }
 
 
     public void del(String key) {
-        db.del(new Slice(key));
+        db.del(Slice.from(key));
     }
 
     @Override

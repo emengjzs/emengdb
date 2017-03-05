@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.api;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 
 /**
  * Created by emengjzs on 2016/12/22.

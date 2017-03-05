@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.log;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 import emengjzs.emengdb.util.io.OutputStreamWrapWritableFile;
 import emengjzs.emengdb.util.io.PrimitiveWritable;
 import emengjzs.emengdb.util.io.WritableFile;
@@ -40,8 +40,8 @@ public class LogTest {
             sb.append("sdfdfdfdfrtrtr");
         }
         try {
-            out.addData(new Slice(sb.toString()));
-            out.addData(new Slice("1232323232323232323435"));
+            out.addData(Slice.from(sb.toString()));
+            out.addData(Slice.from("1232323232323232323435"));
         } catch (Exception e) {
             e.printStackTrace();
         }

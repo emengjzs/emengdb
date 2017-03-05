@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.log;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,7 @@ public class LogReader extends LogFormat {
                 case FULL_TYPE: {
                     if (! inReading) {
                         inReading = true;
-                        return new Slice(byteBuilder.toByteArray());
+                        return Slice.from(byteBuilder.toByteArray());
                     }
                     else {
                         throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
@@ -92,7 +92,7 @@ public class LogReader extends LogFormat {
                     if (! inReading) {
                         throw new LogFileException(LogFileException.Type.RECORD_DATA_ERROR);
                     }
-                    return new Slice(byteBuilder.toByteArray());
+                    return Slice.from(byteBuilder.toByteArray());
                 }
 
                 default: {

@@ -4,6 +4,8 @@
 
 package emengjzs.emengdb.db;
 
+import emengjzs.emengdb.util.byt.Slice;
+
 /**
  * Created by emengjzs on 2016/12/21.
  */

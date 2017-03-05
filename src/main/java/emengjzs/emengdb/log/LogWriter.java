@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.log;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 import emengjzs.emengdb.util.Validate;
 import emengjzs.emengdb.util.io.PrimitiveWritable;
 import emengjzs.emengdb.util.io.WritableFile;
@@ -22,7 +22,7 @@ public class LogWriter extends LogFormat {
 
     private int blockOffset = 0;
 
-    LogWriter(WritableFile writableFile) {
+    public LogWriter(WritableFile writableFile) {
         this.writableFile = new PrimitiveWritable(writableFile);
     }
 
@@ -99,8 +99,8 @@ public class LogWriter extends LogFormat {
         writableFile.writeInt(0x12345678);
         writableFile.writeShort(length & 0xFFFF);
         writableFile.writeByte(type.id);
-
-        writableFile.write(data.array(), data.getStart() + start, length);
+        writableFile.write(data.subSlice(start, length));
+        // writableFile.write(data.array(), data.getStart() + start, length);
         writableFile.flush();
         /*
         if (log.isDebugEnabled()) {

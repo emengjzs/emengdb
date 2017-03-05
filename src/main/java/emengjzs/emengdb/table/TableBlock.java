@@ -4,7 +4,7 @@
 
 package emengjzs.emengdb.table;
 
-import emengjzs.emengdb.db.Slice;
+import emengjzs.emengdb.util.byt.Slice;
 
 import java.nio.ByteBuffer;
 import java.util.Comparator;
